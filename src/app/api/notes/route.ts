@@ -38,8 +38,11 @@ export async function GET(req: Request) {
         const semester = searchParams.get('semester');
         const subject = searchParams.get('subject');
 
+        console.log(semester)
+
+
         let query = {};
-        if (semester) query = { ...query, semester: parseInt(semester) };
+        if (semester) query = { ...query, semester: (semester) };
         if (subject) query = { ...query, subject };
 
         const Notes = await Note.find(query).sort({ createdAt: -1 });

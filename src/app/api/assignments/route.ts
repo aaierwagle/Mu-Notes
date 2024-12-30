@@ -39,7 +39,7 @@ export async function GET(req: Request) {
         const subject = searchParams.get('subject');
 
         let query = {};
-        if (semester) query = { ...query, semester: parseInt(semester) };
+        if (semester) query = { ...query, semester: (semester) };
         if (subject) query = { ...query, subject };
 
         const assignments = await Assignment.find(query).sort({ createdAt: -1 });

@@ -1,11 +1,25 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
+import { SemestersData } from "@/constant/SemesterData";
+
+// Define types for Subject and Chapter
+interface Chapter {
+  name: string;
+}
+
+interface Subject {
+  name: string;
+  chapters: Chapter[];
+}
 
 const AddAssignments = () => {
+  // Use the correct types instead of `any[]`
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
 
   const formik = useFormik({
     initialValues: {
@@ -13,6 +27,7 @@ const AddAssignments = () => {
       description: "",
       subject: "",
       semester: "",
+      chapter: "",
       dueDate: "",
       pdf: "",
     },
@@ -20,10 +35,8 @@ const AddAssignments = () => {
       title: Yup.string().required("Title is required"),
       description: Yup.string().required("Description is required"),
       subject: Yup.string().required("Subject is required"),
-      semester: Yup.number()
-        .required("Semester is required")
-        .positive("Semester must be positive")
-        .integer("Semester must be an integer"),
+      semester: Yup.string().required("Semester is required"),
+      chapter: Yup.string().required("Chapter is required"),
       dueDate: Yup.date()
         .required("Due date is required")
         .min(new Date(), "Due date cannot be in the past"),
@@ -47,6 +60,7 @@ const AddAssignments = () => {
           description: values.description,
           subject: values.subject,
           semester: values.semester,
+          chapter: values.chapter,
           dueDate: values.dueDate,
           fileUrl: pdfUrl,
           fileType: "pdf",
@@ -68,136 +82,137 @@ const AddAssignments = () => {
     }
   };
 
+  const handleSemesterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedSemester = event.target.value;
+    formik.setFieldValue("semester", selectedSemester);
+    const semesterData = SemestersData.find(
+      (semester) => semester.semester === selectedSemester
+    );
+    if (semesterData) {
+      setSubjects(semesterData.subjects); // Set subjects based on selected semester
+    }
+  };
+
+  const handleSubjectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedSubjectName = event.target.value;
+    formik.setFieldValue("subject", selectedSubjectName);
+    const subjectData = subjects.find(
+      (subject) => subject.name === selectedSubjectName
+    );
+    if (subjectData) {
+      setChapters(subjectData.chapters); // Set chapters based on selected subject
+    }
+  };
+
   return (
-    <>
-      <section className="w-full">
-        <h2 className="text-white flex justify-center">Add Assignment</h2>
-        <div className="max-w-lg mx-auto mt-8 bg-gray-800 p-6 rounded shadow-lg">
-          <form onSubmit={formik.handleSubmit} className="flex flex-col gap-4">
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium text-white mb-1">
-                Title
-              </label>
-              <input
-                type="text"
-                id="title"
-                name="title"
-                className={`w-full px-3 py-2 border rounded focus:outline-none ${
-                  formik.touched.title && formik.errors.title ? "border-red-500" : "border-gray-300"
-                }`}
-                value={formik.values.title}
-                onChange={formik.handleChange}
-              />
-              {formik.touched.title && formik.errors.title && (
-                <p className="text-red-500 text-sm mt-1">{formik.errors.title}</p>
-              )}
-            </div>
-
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-white mb-1">
-                Description
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                className={`w-full px-3 py-2 border rounded focus:outline-none ${
-                  formik.touched.description && formik.errors.description
-                    ? "border-red-500"
-                    : "border-gray-300"
-                }`}
-                value={formik.values.description}
-                onChange={formik.handleChange}
-              ></textarea>
-              {formik.touched.description && formik.errors.description && (
-                <p className="text-red-500 text-sm mt-1">{formik.errors.description}</p>
-              )}
-            </div>
-
-            <div>
-              <label htmlFor="subject" className="block text-sm font-medium text-white mb-1">
-                Subject
-              </label>
-              <input
-                type="text"
-                id="subject"
-                name="subject"
-                className={`w-full px-3 py-2 border rounded focus:outline-none ${
-                  formik.touched.subject && formik.errors.subject ? "border-red-500" : "border-gray-300"
-                }`}
-                value={formik.values.subject}
-                onChange={formik.handleChange}
-              />
-              {formik.touched.subject && formik.errors.subject && (
-                <p className="text-red-500 text-sm mt-1">{formik.errors.subject}</p>
-              )}
-            </div>
-
-            <div>
-              <label htmlFor="semester" className="block text-sm font-medium text-white mb-1">
-                Semester
-              </label>
-              <input
-                type="number"
-                id="semester"
-                name="semester"
-                className={`w-full px-3 py-2 border rounded focus:outline-none ${
-                  formik.touched.semester && formik.errors.semester
-                    ? "border-red-500"
-                    : "border-gray-300"
-                }`}
-                value={formik.values.semester}
-                onChange={formik.handleChange}
-              />
-              {formik.touched.semester && formik.errors.semester && (
-                <p className="text-red-500 text-sm mt-1">{formik.errors.semester}</p>
-              )}
-            </div>
-
-            <div>
-              <label htmlFor="dueDate" className="block text-sm font-medium text-white mb-1">
-                Due Date
-              </label>
-              <input
-                type="date"
-                id="dueDate"
-                name="dueDate"
-                className={`w-full px-3 py-2 border rounded focus:outline-none ${
-                  formik.touched.dueDate && formik.errors.dueDate
-                    ? "border-red-500"
-                    : "border-gray-300"
-                }`}
-                value={formik.values.dueDate}
-                onChange={formik.handleChange}
-              />
-              {formik.touched.dueDate && formik.errors.dueDate && (
-                <p className="text-red-500 text-sm mt-1">{formik.errors.dueDate}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-white mb-1">Upload PDF</label>
-              <input
-                type="file"
-                accept=".pdf"
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                onChange={handlePdfChange}
-              />
-              {formik.errors.pdf && (
-                <p className="text-red-500 text-sm mt-1">{formik.errors.pdf}</p>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              disabled={formik.isSubmitting}
-              className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 focus:outline-none"
+    <section className="w-full">
+      <h2 className="text-white flex justify-center">Add Assignment</h2>
+      <div className="max-w-lg mx-auto mt-8 bg-gray-800 p-6 rounded shadow-lg">
+        <form onSubmit={formik.handleSubmit} className="flex flex-col gap-4">
+          <div>
+            <label htmlFor="semester" className="block text-sm font-medium text-white mb-1">
+              Semester
+            </label>
+            <select
+              id="semester"
+              name="semester"
+              className={`w-full px-3 py-2 border rounded focus:outline-none ${
+                formik.touched.semester && formik.errors.semester
+                  ? "border-red-500"
+                  : "border-gray-300"
+              }`}
+              value={formik.values.semester}
+              onChange={handleSemesterChange}
             >
-              Submit
-            </button>
-          </form>
-        </div>
-      </section>
-    </>
+              <option value="">Select a semester</option>
+              {SemestersData.map((semester) => (
+                <option key={semester.semester} value={semester.semester}>
+                  {semester.semester}
+                </option>
+              ))}
+            </select>
+            {formik.touched.semester && formik.errors.semester && (
+              <p className="text-red-500 text-sm mt-1">{formik.errors.semester}</p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="subject" className="block text-sm font-medium text-white mb-1">
+              Subject
+            </label>
+            <select
+              id="subject"
+              name="subject"
+              className={`w-full px-3 py-2 border rounded focus:outline-none ${
+                formik.touched.subject && formik.errors.subject
+                  ? "border-red-500"
+                  : "border-gray-300"
+              }`}
+              value={formik.values.subject}
+              onChange={handleSubjectChange}
+            >
+              <option value="">Select a subject</option>
+              {subjects.map((subject) => (
+                <option key={subject.name} value={subject.name}>
+                  {subject.name}
+                </option>
+              ))}
+            </select>
+            {formik.touched.subject && formik.errors.subject && (
+              <p className="text-red-500 text-sm mt-1">{formik.errors.subject}</p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="chapter" className="block text-sm font-medium text-white mb-1">
+              Chapter
+            </label>
+            <select
+              id="chapter"
+              name="chapter"
+              className={`w-full px-3 py-2 border rounded focus:outline-none ${
+                formik.touched.chapter && formik.errors.chapter
+                  ? "border-red-500"
+                  : "border-gray-300"
+              }`}
+              value={formik.values.chapter}
+              onChange={formik.handleChange}
+            >
+              <option value="">Select a chapter</option>
+              {chapters.map((chapter) => (
+                <option key={chapter.name} value={chapter.name}>
+                  {chapter.name}
+                </option>
+              ))}
+            </select>
+            {formik.touched.chapter && formik.errors.chapter && (
+              <p className="text-red-500 text-sm mt-1">{formik.errors.chapter}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-white mb-1">Upload PDF</label>
+            <input
+              type="file"
+              accept=".pdf"
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              onChange={handlePdfChange}
+            />
+            {formik.errors.pdf && (
+              <p className="text-red-500 text-sm mt-1">{formik.errors.pdf}</p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={formik.isSubmitting}
+            className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 focus:outline-none"
+          >
+            Submit
+          </button>
+        </form>
+      </div>
+    </section>
   );
 };
 

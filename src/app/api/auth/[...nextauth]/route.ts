@@ -19,19 +19,35 @@ const handler = NextAuth({
       try {
         // Connect to the database
         await connectDB();
-
+    
         // Check if user exists in the database
         const existingUser = await User.findOne({ email: user.email });
+    
         if (existingUser) {
+          console.log("user already exist ok")
           return true; // Allow sign-in if user exists
         } else {
-          return true; // Proceed with normal sign-in process if user doesn't exist
+          // Create a new user if they don't exist
+          const newUser = new User({
+            name: user.name,
+            email: user.email,
+            image: user.image,
+            role: 'user', // Set default role (you can modify this as needed)
+            semester: "",
+            isVerifiedByAdmin: false, // Set initial verification status (adjust as needed)
+          });
+    
+          // Save the new user to the database
+          await newUser.save();
+    console.log("user is saved ok")
+          return true; // Proceed with sign-in process
         }
       } catch (error) {
         console.error('Error during sign-in:', error); // Log the error
         return false; // Block sign-in if an error occurs
       }
-    },
+    }
+    ,
     async session({ session, token }) {
       try {
         // Fetch latest user data from database

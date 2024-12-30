@@ -8,6 +8,13 @@ import { Eye, Download } from "lucide-react";
 import { EditNote } from "@/components/(notes)/EditDialog";
 import { DeleteNote } from "@/components/(notes)/DeleteDialog";
 import AddNotes from "@/components/(notes)/AddNotes";
+import { SemestersData } from "@/constant/SemesterData";
+
+// Define the Subject type (assuming a subject has at least a name property)
+interface Subject {
+  name: string;
+  // Add other properties if necessary
+}
 
 // Define the note type
 interface Note {
@@ -27,6 +34,7 @@ export default function NotesSection() {
     semester: "",
     subject: "",
   });
+  const [semesterSubjects, setSemesterSubjects] = useState<Subject[]>([]); // Fixed the type to Subject[]
 
   // useCallback to memoize the function and avoid unnecessary re-renders
   const fetchnotes = useCallback(async () => {
@@ -37,11 +45,22 @@ export default function NotesSection() {
     const response = await fetch(`/api/notes?${params}`);
     const data = await response.json();
     setNotes(data);
-  }, [filters]); // `fetchnotes` now depends on `filters`
+  }, [filters]);
 
   useEffect(() => {
     fetchnotes();
-  }, [fetchnotes]); // Include `fetchnotes` in the dependency array
+  }, [fetchnotes]);
+
+  // Handle semester change
+  const handleSemesterChange = (semester: string) => {
+    setFilters((prev) => ({ ...prev, semester }));
+    const selectedSemester = SemestersData.find((data) => data.semester === semester);
+    if (selectedSemester) {
+      setSemesterSubjects(selectedSemester.subjects);
+    } else {
+      setSemesterSubjects([]);
+    }
+  };
 
   const handlePreview = (fileUrl: string) => {
     window.open(fileUrl, "_blank");
@@ -61,7 +80,6 @@ export default function NotesSection() {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Download failed:", error);
-      // You might want to show an error message to the user here
     }
   };
 
@@ -71,15 +89,15 @@ export default function NotesSection() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Select
           value={filters.semester}
-          onValueChange={(value) => setFilters({ ...filters, semester: value })}
+          onValueChange={handleSemesterChange}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select Semester" />
           </SelectTrigger>
           <SelectContent>
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
-              <SelectItem key={sem} value={sem.toString()}>
-                Semester {sem}
+            {["1st Semester", "2nd Semester", "3rd Semester", "4th Semester", "5th Semester", "6th Semester"].map((sem) => (
+              <SelectItem key={sem} value={sem}>
+                {sem}
               </SelectItem>
             ))}
           </SelectContent>
@@ -93,9 +111,9 @@ export default function NotesSection() {
             <SelectValue placeholder="Select Subject" />
           </SelectTrigger>
           <SelectContent>
-            {["Mathematics", "Physics", "Computer Science", "Electronics"].map((subject) => (
-              <SelectItem key={subject} value={subject}>
-                {subject}
+            {semesterSubjects.map((subject) => (
+              <SelectItem key={subject.name} value={subject.name}>
+                {subject.name}
               </SelectItem>
             ))}
           </SelectContent>

@@ -4,9 +4,9 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useSession } from "next-auth/react";
-import { Download, Eye } from "lucide-react";
-import { signIn } from "next-auth/react";
+import { Eye } from "lucide-react";
+import { SemestersData } from "@/constant/SemesterData";
+import  Favourite from "./(makebetter)/Favourite ";
 
 // Define the type for the note object
 interface Note {
@@ -20,7 +20,6 @@ interface Note {
 }
 
 export default function NotesSection() {
-  const { data: session } = useSession();
   const [notes, setNotes] = useState<Note[]>([]); // Use the Note type
   const [filters, setFilters] = useState({
     semester: "",
@@ -44,17 +43,20 @@ export default function NotesSection() {
     fetchNotes(); // Call fetchNotes when filters change
   }, [fetchNotes]); // Make sure fetchNotes is included in the dependency array
 
-  const handleDownload = async (fileUrl: string) => {
-    if (!session) {
-      signIn("google");
-      return;
-    }
-    window.open(fileUrl, "_blank");
-  };
+
 
   const handlePreview = (fileUrl: string) => {
     window.open(fileUrl, "_blank");
   };
+
+  // Get the available subjects and chapters based on the selected semester
+  const semesterData = SemestersData.find(
+    (semester) => semester.semester === filters.semester
+  );
+  const subjects = semesterData ? semesterData.subjects : [];
+  const chapters = subjects.find(
+    (subject) => subject.name === filters.subject
+  )?.chapters || [];
 
   return (
     <div>
@@ -67,9 +69,9 @@ export default function NotesSection() {
             <SelectValue placeholder="Select Semester" />
           </SelectTrigger>
           <SelectContent>
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
-              <SelectItem key={sem} value={sem.toString()}>
-                Semester {sem}
+            {SemestersData.map((sem, index) => (
+              <SelectItem key={index} value={sem.semester}>
+                {sem.semester}
               </SelectItem>
             ))}
           </SelectContent>
@@ -83,9 +85,9 @@ export default function NotesSection() {
             <SelectValue placeholder="Select Subject" />
           </SelectTrigger>
           <SelectContent>
-            {["Mathematics", "Physics", "Computer Science", "Electronics"].map((subject) => (
-              <SelectItem key={subject} value={subject}>
-                {subject}
+            {subjects.map((subject, index) => (
+              <SelectItem key={index} value={subject.name}>
+                {subject.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -99,9 +101,9 @@ export default function NotesSection() {
             <SelectValue placeholder="Select Chapter" />
           </SelectTrigger>
           <SelectContent>
-            {["Chapter 1", "Chapter 2", "Chapter 3", "Chapter 4"].map((chapter) => (
-              <SelectItem key={chapter} value={chapter}>
-                {chapter}
+            {chapters.map((chapter, index) => (
+              <SelectItem key={index} value={chapter.name}>
+                {chapter.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -131,13 +133,7 @@ export default function NotesSection() {
                 <Eye className="w-4 h-4 mr-2" />
                 Preview
               </Button>
-              <Button
-                size="sm"
-                onClick={() => handleDownload(note.fileUrl)}
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Download
-              </Button>
+              <Favourite itemId={note._id} type="note" />
             </CardFooter>
           </Card>
         ))}

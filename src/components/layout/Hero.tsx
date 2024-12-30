@@ -11,13 +11,13 @@ export default function Hero() {
       <div className="container mx-auto px-4">
         <div className="flex flex-col lg:flex-row items-center gap-12">
           <div className="flex-1 text-center lg:text-left">
-            <h1 className="text-4xl lg:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60 text-black">
-              Your Academic Journey
+          <h1 className="text-4xl lg:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60 text-black">
+              BSc CSIT Assignments
               <br />
-              Made Easier
+              Notes Sharing Platform
             </h1>
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl">
-              Access and share quality educational resources. Find notes, assignments, and study materials all in one place.
+              This website was created by a student of Mid-West University, BSc CSIT, to provide easy access to and storage for notes and assignments. Find and share quality educational resources all in one place.
             </p>
             <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
               <Button size="lg" className="gap-2">

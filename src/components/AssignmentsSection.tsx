@@ -4,9 +4,10 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useSession } from "next-auth/react";
-import { Download, Eye } from "lucide-react";
-import { signIn } from "next-auth/react";
+import { Eye } from "lucide-react";
+import { SemestersData } from "@/constant/SemesterData";
+import Favourite from "./(makebetter)/Favourite ";
+
 
 // Define a type for the assignment
 interface Assignment {
@@ -14,17 +15,17 @@ interface Assignment {
   title: string;
   description: string;
   subject: string;
-  semester: number;
+  semester: string;
   dueDate: string;
   fileUrl: string;
 }
 
 export default function AssignmentsSection() {
-  const { data: session } = useSession();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [filters, setFilters] = useState({
     semester: "",
     subject: "",
+    chapter: "",
   });
 
   // Use useCallback to memoize the fetchAssignments function
@@ -32,6 +33,8 @@ export default function AssignmentsSection() {
     const params = new URLSearchParams();
     if (filters.semester) params.append("semester", filters.semester);
     if (filters.subject) params.append("subject", filters.subject);
+    if (filters.chapter) params.append("chapter", filters.chapter);
+
 
     const response = await fetch(`/api/assignments?${params}`);
     const data = await response.json();
@@ -41,22 +44,24 @@ export default function AssignmentsSection() {
   useEffect(() => {
     fetchAssignments();
   }, [fetchAssignments]); // Add fetchAssignments as a dependency
-
-  const handleDownload = async (fileUrl: string) => {
-    if (!session) {
-      signIn("google");
-      return;
-    }
-    window.open(fileUrl, "_blank");
-  };
-
+  
   const handlePreview = (fileUrl: string) => {
     window.open(fileUrl, "_blank");
   };
 
+  // Get the available subjects based on the selected semester
+  const semesterData = SemestersData.find(
+    (semester) => semester.semester === filters.semester
+  );
+  const subjects = semesterData ? semesterData.subjects : [];
+
+  const chapters = subjects.find(
+    (subject) => subject.name === filters.subject
+  )?.chapters || [];
+
   return (
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <Select
           value={filters.semester}
           onValueChange={(value) => setFilters({ ...filters, semester: value })}
@@ -65,9 +70,9 @@ export default function AssignmentsSection() {
             <SelectValue placeholder="Select Semester" />
           </SelectTrigger>
           <SelectContent>
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
-              <SelectItem key={sem} value={sem.toString()}>
-                Semester {sem}
+            {SemestersData.map((sem, index) => (
+              <SelectItem key={index} value={sem.semester}>
+                {sem.semester}
               </SelectItem>
             ))}
           </SelectContent>
@@ -81,9 +86,25 @@ export default function AssignmentsSection() {
             <SelectValue placeholder="Select Subject" />
           </SelectTrigger>
           <SelectContent>
-            {["Mathematics", "Physics", "Computer Science", "Electronics"].map((subject) => (
-              <SelectItem key={subject} value={subject}>
-                {subject}
+            {subjects.map((subject, index) => (
+              <SelectItem key={index} value={subject.name}>
+                {subject.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={filters.chapter}
+          onValueChange={(value) => setFilters({ ...filters, chapter: value })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select Chapter" />
+          </SelectTrigger>
+          <SelectContent>
+            {chapters.map((chapter, index) => (
+              <SelectItem key={index} value={chapter.name}>
+                {chapter.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -113,13 +134,7 @@ export default function AssignmentsSection() {
                 <Eye className="w-4 h-4 mr-2" />
                 Preview
               </Button>
-              <Button
-                size="sm"
-                onClick={() => handleDownload(assignment.fileUrl)}
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Download
-              </Button>
+              <Favourite itemId={assignment._id} type="assignment" />
             </CardFooter>
           </Card>
         ))}

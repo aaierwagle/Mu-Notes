@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 // Define User Schema
 const userSchema = new mongoose.Schema({
   name: String,
+  semester: String,
   email: { type: String, unique: true },
   password: String,
   provider: String,

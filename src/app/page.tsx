@@ -5,6 +5,7 @@ import NotesSection from "@/components/NotesSection";
 import AssignmentsSection from "@/components/AssignmentsSection";
 import Hero from "@/components/layout/Hero";
 import Footer from "@/components/layout/Footer";
+import ForYou from "@/components/(makebetter)/ForYou";
 
 export default function Home() {
   return (
@@ -39,6 +40,7 @@ export default function Home() {
             </Card>
           </TabsContent>
         </Tabs>
+        <ForYou/>
       </main>
       <Footer />
     </>

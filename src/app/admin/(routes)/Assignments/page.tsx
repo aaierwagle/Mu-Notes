@@ -8,6 +8,13 @@ import { Eye } from "lucide-react";
 import { EditDialog } from "@/components/(assinments)/EditDialog";
 import { DeleteDialog } from "@/components/(assinments)/DeleteDialog";
 import AddAssignments from "@/components/(assinments)/AddAssignments";
+import { SemestersData } from "@/constant/SemesterData";
+
+// Define the Subject type (assuming a subject has at least a name property)
+interface Subject {
+  name: string;
+  // Add other properties if necessary
+}
 
 // Define the assignment type
 interface Assignment {
@@ -27,6 +34,7 @@ export default function AssignmentsSection() {
     semester: "",
     subject: "",
   });
+  const [semesterSubjects, setSemesterSubjects] = useState<Subject[]>([]); // Fixed the type to Subject[]
 
   // useCallback to memoize the function and avoid unnecessary re-renders
   const fetchAssignments = useCallback(async () => {
@@ -37,26 +45,34 @@ export default function AssignmentsSection() {
     const response = await fetch(`/api/assignments?${params}`);
     const data = await response.json();
     setAssignments(data);
-  }, [filters]); // `fetchAssignments` now depends on `filters`
+  }, [filters]);
 
   useEffect(() => {
     fetchAssignments();
-  }, [fetchAssignments]); // Include `fetchAssignments` in the dependency array
+  }, [fetchAssignments]);
+
+  // Handle semester change
+  const handleSemesterChange = (semester: string) => {
+    setFilters((prev) => ({ ...prev, semester }));
+    const selectedSemester = SemestersData.find((data) => data.semester === semester);
+    if (selectedSemester) {
+      setSemesterSubjects(selectedSemester.subjects);
+    } else {
+      setSemesterSubjects([]);
+    }
+  };
 
   const handlePreview = (fileUrl: string) => {
     window.open(fileUrl, "_blank");
   };
 
-  // Define the handleDownloadCount function
   const handleDownloadCount = async (assignmentId: string) => {
     try {
-      // Call API to update download count (this is just an example)
       const response = await fetch(`/api/assignments/${assignmentId}/incrementDownloadCount`, {
         method: "PATCH",
       });
 
       if (response.ok) {
-        // Update the local state to reflect the new download count
         setAssignments((prevAssignments) =>
           prevAssignments.map((assignment) =>
             assignment._id === assignmentId
@@ -78,15 +94,15 @@ export default function AssignmentsSection() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Select
           value={filters.semester}
-          onValueChange={(value) => setFilters({ ...filters, semester: value })}
+          onValueChange={handleSemesterChange}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select Semester" />
           </SelectTrigger>
           <SelectContent>
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
-              <SelectItem key={sem} value={sem.toString()}>
-                Semester {sem}
+            {["1st Semester", "2nd Semester", "3rd Semester", "4th Semester", "5th Semester", "6th Semester"].map((sem) => (
+              <SelectItem key={sem} value={sem}>
+                {sem}
               </SelectItem>
             ))}
           </SelectContent>
@@ -100,9 +116,9 @@ export default function AssignmentsSection() {
             <SelectValue placeholder="Select Subject" />
           </SelectTrigger>
           <SelectContent>
-            {["Mathematics", "Physics", "Computer Science", "Electronics"].map((subject) => (
-              <SelectItem key={subject} value={subject}>
-                {subject}
+            {semesterSubjects.map((subject) => (
+              <SelectItem key={subject.name} value={subject.name}>
+                {subject.name}
               </SelectItem>
             ))}
           </SelectContent>
