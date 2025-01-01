@@ -1,6 +1,6 @@
 For questions, suggestions, or collaboration, reach out to:
 
--Instagram: @iamaaier
+- **Instagram:** [https://www.instagram.com/iamaaier/)
 ---
 
 # College Notes and Projects
