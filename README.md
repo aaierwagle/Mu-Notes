@@ -1,5 +1,3 @@
-Here's a template for a common README file that you can use for your `2025Codes` repository:
-
 ---
 
 # 2025Codes
