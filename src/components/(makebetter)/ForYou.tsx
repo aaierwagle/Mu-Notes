@@ -7,9 +7,10 @@ import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Button } from "@/components/ui/button"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Skeleton } from "@/components/ui/skeleton"
-import { BookOpen, FileText, Download, ExternalLink } from 'lucide-react'
+import { BookOpen, FileText, Download, ExternalLink, Eye } from 'lucide-react'
 import Link from 'next/link'
 import LoginForm from '../LoginForm'
+import Favourite from './Favourite '
 
 interface ContentItem {
   _id: string
@@ -25,6 +26,11 @@ interface ApiResponse {
   notes: ContentItem[]
   assignments: ContentItem[]
 }
+
+const handlePreview = (fileUrl: string) => {
+  window.open(fileUrl, "_blank");
+};
+
 
 export default function PersonalizedContent() {
   const [data, setData] = useState<ApiResponse | null>(null)
@@ -78,14 +84,15 @@ export default function PersonalizedContent() {
               <p className="text-muted-foreground text-sm line-clamp-2">{item.description}</p>
             </CardContent>
             <CardFooter className="p-4 flex justify-between bg-gray-50 dark:bg-gray-700">
-              <Button variant="outline" size="sm" className="w-[45%]">
-                <ExternalLink className="w-4 h-4 mr-2" />
+            <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePreview(item.fileUrl)}
+              >
+                <Eye className="w-4 h-4 mr-2" />
                 Preview
               </Button>
-              <Button variant="outline" size="sm" className="w-[45%]">
-                <Download className="w-4 h-4 mr-2" />
-                Download
-              </Button>
+              <Favourite itemId={item._id} type={items === data?.notes ? "note" : "assignment"} />
             </CardFooter>
           </Card>
         ))}
