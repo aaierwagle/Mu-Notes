@@ -7,7 +7,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Button } from "@/components/ui/button"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Skeleton } from "@/components/ui/skeleton"
-import { BookOpen, FileText, Download, ExternalLink, Eye } from 'lucide-react'
+import { BookOpen, FileText, Eye } from 'lucide-react'
 import Link from 'next/link'
 import LoginForm from '../LoginForm'
 import Favourite from './Favourite '

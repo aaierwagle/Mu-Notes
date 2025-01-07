@@ -17,7 +17,7 @@ export default function LoginForm() {
     if (response?.error) {
       setError('Error signing in with Google')
     } else {
-      router.push('/profile') // Redirect to dashboard after login
+      router.push('/') // Redirect to dashboard after login
       router.refresh()
     }
   }

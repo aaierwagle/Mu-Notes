@@ -70,7 +70,7 @@ export default function AssignmentsSection() {
             <SelectValue placeholder="Select Semester" />
           </SelectTrigger>
           <SelectContent>
-            {SemestersData.map((sem, index) => (
+            {SemestersData?.map((sem, index) => (
               <SelectItem key={index} value={sem.semester}>
                 {sem.semester}
               </SelectItem>
