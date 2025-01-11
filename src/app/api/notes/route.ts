@@ -31,24 +31,36 @@ export async function POST(request: NextRequest) {
     }
 }
 
+
 export async function GET(req: Request) {
     try {
-        await connectDB();
-        const { searchParams } = new URL(req.url);
-        const semester = searchParams.get('semester');
-        const subject = searchParams.get('subject');
-
-        console.log(semester)
-
-
-        let query = {};
-        if (semester) query = { ...query, semester: (semester) };
-        if (subject) query = { ...query, subject };
-
-        const Notes = await Note.find(query).sort({ createdAt: -1 });
-        return NextResponse.json(Notes);
+      await connectDB();
+      const { searchParams } = new URL(req.url);
+      const semester = searchParams.get("semester");
+      const subject = searchParams.get("subject");
+      const chapter = searchParams.get("chapter");  // Add chapter filter
+      const page = parseInt(searchParams.get("page") || "1");
+      const limit = 10; // Number of notes per page
+  
+      let query: any = {};  // Ensure 'query' is typed to allow dynamic properties
+  
+      if (semester) query = { ...query, semester };
+      if (subject) query = { ...query, subject };
+      if (chapter) query = { ...query, chapter };  // Add chapter to the query
+  
+      const Notes = await Note.find(query)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)  // Skip the previous pages' data
+        .limit(limit); // Limit to the number of notes per page
+  
+      return NextResponse.json(Notes);
     } catch (error) {
-        console.error("Error fetching Notes:", error); // Log the error for debugging
-        return NextResponse.json({ error: 'Failed to fetch Notes' }, { status: 500 });
+      console.error("Error fetching Notes:", error);
+      return NextResponse.json(
+        { error: "Failed to fetch Notes" },
+        { status: 500 }
+      );
     }
-}
+  }
+  
+  

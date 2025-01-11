@@ -15,11 +15,11 @@ const AssignmentSchema = new mongoose.Schema(
       required: true,
     },
     semester: {
-      type: String,  // Using String for semesters, as "1st Semester" is a string
+      type: String, 
       required: true,
     },
-    chapters: {
-      type: [String],  // Array of chapter names for the subject
+    chapter: {
+      type: String,
       required: true,
     },
     dueDate: {

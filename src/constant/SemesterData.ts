@@ -74,10 +74,10 @@ export const SemestersData: SemesterSubjects[] = [
         semester: "2nd Semester",
         subjects: [
             {
-                name: "Discrete Structures", 
+                name: "Computer Science", 
                 teacher: "ABCD", 
                 chapters: [
-                    { name: "Sets and Relations" },
+                    { name: "19" },
                     { name: "Functions and Graphs" },
                     { name: "Combinatorics" },
                     { name: "Boolean Functions" }
@@ -94,10 +94,10 @@ export const SemestersData: SemesterSubjects[] = [
                 ]
             },
             {
-                name: "Microprocessor", 
+                name: "Discrete Structures", 
                 teacher: "ABCD", 
                 chapters: [
-                    { name: "Introduction to Microprocessor" },
+                    { name: "19" },
                     { name: "Intel 8085 Microprocessor" },
                     { name: "Assembly Language Programming" },
                     { name: "Memory and I/O Interfacing" }

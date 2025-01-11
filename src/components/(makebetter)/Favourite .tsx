@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { Button } from '../ui/button';
-import { Star } from 'lucide-react';
+import { Star, Loader2, Heart, HeartOff } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -18,9 +18,8 @@ const Favourite = ({ itemId, type }: { itemId: string; type: 'note' | 'assignmen
   const [isFavorited, setIsFavorited] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-  // Check if the item is already in favorites on component mount
   useEffect(() => {
-    if (!session) return; // Don't check if there's no session
+    if (!session) return;
 
     const checkIfFavorited = async () => {
       setIsLoading(true);
@@ -113,43 +112,62 @@ const Favourite = ({ itemId, type }: { itemId: string; type: 'note' | 'assignmen
 
   return (
     <>
-      <Button
-        size="sm"
-        onClick={handleFavouriteClick}
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <span className="flex items-center">
-            <Star className="w-4 h-4 mr-2 animate-spin" />
-            Loading...
-          </span>
-        ) : isFavorited ? (
-          <span className="flex items-center">
-            <Star className="w-4 h-4 mr-2 text-yellow-500" />
-            Remove Favourites
-          </span>
-        ) : (
-          <span className="flex items-center">
-            <Star className="w-4 h-4 mr-2" />
-            Add Favourites
-          </span>
-        )}
-      </Button>
+<Button
+  size="sm"
+  onClick={handleFavouriteClick}
+  disabled={isLoading}
+  className={`
+    relative group transition-all duration-300
+    ${isFavorited 
+      ? 'bg-pink-500 hover:bg-pink-600 text-white hover:shadow-lg hover:shadow-pink-500/30'
+      : 'bg-white hover:bg-pink-50 text-gray-700 border border-gray-200 hover:border-pink-200 hover:text-pink-500'
+    }
+    rounded-full px-3 py-1 text-xs sm:text-sm w-full sm:w-auto
+  `}
+>
+  {isLoading ? (
+    <span className="flex items-center gap-1">
+      <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
+      <span className="font-medium">Processing...</span>
+    </span>
+  ) : isFavorited ? (
+    <span className="flex items-center gap-1">
+      <Heart className="w-3 h-3 sm:w-4 sm:h-4 fill-current" />
+      <span className="font-medium">Favorited</span>
+    </span>
+  ) : (
+    <span className="flex items-center gap-1">
+      <Heart className="w-3 h-3 sm:w-4 sm:h-4" />
+      <span className="font-medium">Favorites</span>
+    </span>
+  )}
+</Button>
+
+
 
       <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Login Required</DialogTitle>
-            <DialogDescription>
-              Please log in to add items to your favourites
+            <DialogTitle className="text-center text-xl font-semibold text-gray-900">
+              Login Required
+            </DialogTitle>
+            <DialogDescription className="text-center text-gray-600">
+              Please sign in to add this {type} to your favorites collection
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowLoginModal(false)}>
+          <DialogFooter className="flex gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setShowLoginModal(false)}
+              className="flex-1 transition-colors hover:bg-gray-100"
+            >
               Cancel
             </Button>
-            <Button onClick={() => signIn()}>
-              Login
+            <Button
+              onClick={() => signIn()}
+              className="flex-1 bg-pink-500 hover:bg-pink-600 text-white transition-colors"
+            >
+              Sign In
             </Button>
           </DialogFooter>
         </DialogContent>

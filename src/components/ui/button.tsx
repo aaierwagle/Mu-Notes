@@ -18,6 +18,9 @@ const buttonVariants = cva(
           'bg-secondary text-secondary-foreground hover:bg-secondary/80',
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
+        gradient:
+          'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white hover:opacity-90',
+        shadow: 'bg-primary text-primary-foreground shadow-lg hover:shadow-xl',
       },
       size: {
         default: 'h-10 px-4 py-2',
@@ -37,17 +40,24 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
+  iconLeft?: React.ReactNode;
+  iconRight?: React.ReactNode;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, iconLeft, iconRight, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button';
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
-      />
+        aria-label={props['aria-label'] || props.children?.toString() || 'Button'}
+      >
+        {iconLeft && <span className="mr-2 inline-flex items-center">{iconLeft}</span>}
+        {props.children}
+        {iconRight && <span className="ml-2 inline-flex items-center">{iconRight}</span>}
+      </Comp>
     );
   }
 );
